@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cyber-dark text-white antialiased;
+    background-image: 
+      radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(255, 107, 53, 0.05) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-cyber-navy/40 backdrop-blur-md border border-white/10 rounded-xl;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .glass-card-hover {
+    @apply transition-all duration-300 hover:bg-cyber-navy/60 hover:border-cyber-cyan/30 hover:shadow-cyber-glow;
+  }
+
+  .cyber-border {
+    @apply border border-cyber-cyan/30;
+    box-shadow: 0 0 15px rgba(0, 217, 255, 0.2);
+  }
+
+  .neon-text {
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-cyber-cyan to-cyber-neon-green bg-clip-text text-transparent;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-cyber-cyan to-cyber-neon-green text-cyber-dark font-semibold px-6 py-3 rounded-lg;
+    @apply transition-all duration-300 hover:shadow-green-glow hover:scale-105;
+  }
+
+  .btn-secondary {
+    @apply glass-card px-6 py-3 rounded-lg font-semibold;
+    @apply transition-all duration-300 hover:bg-cyber-navy/60 hover:border-cyber-cyan/50;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-cyber-dark;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-cyber-cyan/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-cyber-cyan/50;
+}
