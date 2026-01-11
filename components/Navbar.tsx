@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Menu, Bell, Search } from 'lucide-react'
+import { Menu } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Navbar() {
@@ -24,16 +24,6 @@ export default function Navbar() {
             Risk Watch
           </Link>
         </div>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <button className="p-2 hover:bg-cyber-navy/60 rounded-lg transition-colors relative">
-          <Search className="w-5 h-5" />
-        </button>
-        <button className="p-2 hover:bg-cyber-navy/60 rounded-lg transition-colors relative">
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-        </button>
       </div>
     </nav>
   )
