@@ -46,6 +46,22 @@ export default function GamePage() {
   const [runTutorial, setRunTutorial] = useState(false)
   const [tutorialStepIndex, setTutorialStepIndex] = useState(0)
 
+  // Track trades in localStorage for profile
+  useEffect(() => {
+    if (trades.length > 0) {
+      const currentTotalTrades = parseInt(localStorage.getItem('totalTrades') || '0')
+      localStorage.setItem('totalTrades', (currentTotalTrades + 1).toString())
+    }
+  }, [trades.length])
+
+  // Track simulator sessions when simulation starts
+  useEffect(() => {
+    if (isPlaying && time === 0) {
+      const currentSessions = parseInt(localStorage.getItem('simulatorSessions') || '0')
+      localStorage.setItem('simulatorSessions', (currentSessions + 1).toString())
+    }
+  }, [isPlaying, time])
+
   const tutorialSteps: Step[] = [
     { target: '.tutorial-chart', content: 'This is the live price chart showing real-time cryptocurrency movements. Watch how the price changes over time!', placement: 'top' },
     { target: '.tutorial-buy', content: 'Click here to buy cryptocurrency at the current market price. Start with small amounts to learn!', placement: 'right' },
