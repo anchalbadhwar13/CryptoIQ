@@ -2,12 +2,11 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, TrendingUp, AlertTriangle, Gamepad2, BookOpen, User, LogOut } from 'lucide-react'
+import { TrendingUp, AlertTriangle, Gamepad2, BookOpen, User, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Learning Hub', href: '/learn', icon: BookOpen },
+  { name: 'Learning Hub', href: '/dashboard', icon: BookOpen },
   { name: 'Risk Lab', href: '/risk-lab', icon: AlertTriangle },
   { name: 'Market Watch', href: '/market', icon: TrendingUp },
   { name: 'Simulator', href: '/game', icon: Gamepad2 },
