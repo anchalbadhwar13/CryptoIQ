@@ -21,15 +21,19 @@ export async function POST(req: NextRequest) {
 
     const { message, sessionData, conversationHistory } = await req.json()
 
-    // Build conversation context
-    const systemPrompt = `You are an expert crypto trading assistant helping users learn about trading in a simulator. 
+    // Build conversation context based on whether we have session data
+    let systemPrompt: string
+    
+    if (sessionData && sessionData.isPlaying !== undefined) {
+      // Simulator page - include trading session data
+      systemPrompt = `You are an expert crypto trading assistant helping users learn about trading in a simulator. 
 You have access to their current session data:
-- Current BTC Price: $${sessionData.currentPrice.toLocaleString()}
-- Cash Balance: $${sessionData.balance.toFixed(2)}
-- BTC Holdings: ${sessionData.holdings.toFixed(4)} BTC
-- Portfolio Value: $${sessionData.portfolioValue.toFixed(2)}
-- ROI: ${sessionData.roi.toFixed(2)}%
-- Total Trades Made: ${sessionData.trades.length}
+- Current BTC Price: $${sessionData.currentPrice?.toLocaleString() || 'N/A'}
+- Cash Balance: $${sessionData.balance?.toFixed(2) || 'N/A'}
+- BTC Holdings: ${sessionData.holdings?.toFixed(4) || '0'} BTC
+- Portfolio Value: $${sessionData.portfolioValue?.toFixed(2) || 'N/A'}
+- ROI: ${sessionData.roi?.toFixed(2) || '0'}%
+- Total Trades Made: ${sessionData.trades?.length || 0}
 - Trading Status: ${sessionData.isPlaying ? 'Active' : 'Paused'}
 
 Provide detailed, comprehensive advice about their trades, market analysis, and crypto trading strategies. Include:
@@ -39,6 +43,24 @@ Provide detailed, comprehensive advice about their trades, market analysis, and 
 - Recommendations with reasoning
 
 Be encouraging, educational, and thorough in your responses.`
+    } else {
+      // General pages - be a helpful crypto education assistant
+      systemPrompt = `You are CoinCoach, a friendly and knowledgeable crypto education assistant. 
+You help beginners learn about cryptocurrency safely.
+
+Your expertise includes:
+- Explaining crypto concepts in simple terms
+- Teaching about different cryptocurrencies and their uses
+- Explaining blockchain technology
+- Helping users understand market analysis
+- Teaching about risk management and safe trading practices
+- Warning about common scams and how to avoid them
+- Explaining DeFi, NFTs, wallets, and exchanges
+
+Be friendly, encouraging, and educational. Use simple language and examples.
+Always emphasize safety and warn about risks when relevant.
+If asked about specific investment advice, remind users to do their own research (DYOR).`
+    }
 
     const contents = conversationHistory
       .slice(-10) // Keep last 10 messages for context

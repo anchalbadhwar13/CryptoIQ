@@ -50,6 +50,7 @@ export default function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
+                prefetch={true}
                 className={cn(
                   'flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200',
                   isActive

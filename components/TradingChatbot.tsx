@@ -12,16 +12,18 @@ interface Message {
   timestamp: number
 }
 
+interface SessionData {
+  currentPrice: number
+  balance: number
+  holdings: number
+  trades: Array<{ type: 'buy' | 'sell'; price: number; amount: number }>
+  portfolioValue: number
+  roi: number
+  isPlaying: boolean
+}
+
 interface ChatbotProps {
-  sessionData: {
-    currentPrice: number
-    balance: number
-    holdings: number
-    trades: Array<{ type: 'buy' | 'sell'; price: number; amount: number }>
-    portfolioValue: number
-    roi: number
-    isPlaying: boolean
-  }
+  sessionData?: SessionData
 }
 
 export default function TradingChatbot({ sessionData }: ChatbotProps) {
@@ -31,7 +33,7 @@ export default function TradingChatbot({ sessionData }: ChatbotProps) {
     {
       id: '1',
       type: 'assistant',
-      content: 'Hey! 👋 I\'m your trading assistant. I can help you analyze your trades, provide market insights, and answer questions about crypto trading. What would you like to know?',
+      content: 'Hey! 👋 I\'m CoinCoach, your crypto learning assistant. I can help you understand crypto concepts, analyze markets, learn trading strategies, and answer any questions about cryptocurrency. What would you like to know?',
       timestamp: Date.now(),
     },
   ])

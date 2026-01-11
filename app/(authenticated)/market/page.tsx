@@ -119,9 +119,22 @@ export default function MarketPage() {
       <GlassCard className="p-6 overflow-x-auto">
         <div className="min-w-[800px]">
           {loading && marketData.length === 0 ? (
-            <div className="flex items-center justify-center py-12">
-              <RefreshCw className="w-8 h-8 animate-spin text-cyber-cyan" />
-              <span className="ml-3 text-gray-400">Loading market data...</span>
+            <div className="space-y-4">
+              {/* Skeleton loading */}
+              {[...Array(8)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4 py-3 animate-pulse">
+                  <div className="w-8 h-4 bg-gray-700 rounded" />
+                  <div className="w-10 h-10 bg-gray-700 rounded-full" />
+                  <div className="flex-1">
+                    <div className="w-24 h-4 bg-gray-700 rounded mb-2" />
+                    <div className="w-16 h-3 bg-gray-700 rounded" />
+                  </div>
+                  <div className="w-20 h-4 bg-gray-700 rounded" />
+                  <div className="w-16 h-4 bg-gray-700 rounded" />
+                  <div className="w-24 h-4 bg-gray-700 rounded" />
+                  <div className="w-24 h-4 bg-gray-700 rounded" />
+                </div>
+              ))}
             </div>
           ) : (
             <table className="w-full">

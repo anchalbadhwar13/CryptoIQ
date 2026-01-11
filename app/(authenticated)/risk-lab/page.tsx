@@ -141,9 +141,20 @@ export default function RiskLabPage() {
           </div>
           
           {loading && coins.length === 0 ? (
-            <div className="flex items-center justify-center py-12">
-              <RefreshCw className="w-6 h-6 animate-spin text-cyber-cyan" />
-              <span className="ml-3 text-gray-400">Loading coins...</span>
+            <div className="space-y-3">
+              {/* Skeleton loading */}
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="p-4 rounded-lg border border-white/10 animate-pulse">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gray-700 rounded-full" />
+                    <div className="flex-1">
+                      <div className="w-24 h-4 bg-gray-700 rounded mb-2" />
+                      <div className="w-16 h-3 bg-gray-700 rounded" />
+                    </div>
+                    <div className="w-16 h-6 bg-gray-700 rounded" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="space-y-3 max-h-96 overflow-y-auto">

@@ -2,6 +2,7 @@
 
 import Sidebar from '@/components/Sidebar'
 import Navbar from '@/components/Navbar'
+import TradingChatbot from '@/components/TradingChatbot'
 
 export default function AuthenticatedLayout({
   children,
@@ -17,6 +18,7 @@ export default function AuthenticatedLayout({
           {children}
         </main>
       </div>
+      <TradingChatbot />
     </div>
   )
 }
