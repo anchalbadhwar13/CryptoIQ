@@ -32,8 +32,13 @@ You have access to their current session data:
 - Total Trades Made: ${sessionData.trades.length}
 - Trading Status: ${sessionData.isPlaying ? 'Active' : 'Paused'}
 
-Provide helpful, concise advice about their trades, market analysis tips, and crypto trading strategies.
-Be encouraging and educational. Keep responses under 150 words.`
+Provide detailed, comprehensive advice about their trades, market analysis, and crypto trading strategies. Include:
+- Specific analysis of their current position
+- Trading tips and techniques
+- Market insights
+- Recommendations with reasoning
+
+Be encouraging, educational, and thorough in your responses.`
 
     const contents = conversationHistory
       .slice(-10) // Keep last 10 messages for context
@@ -66,7 +71,7 @@ Be encouraging and educational. Keep responses under 150 words.`
       body: JSON.stringify({
         contents: validContents,
         generationConfig: {
-          maxOutputTokens: 500,
+          maxOutputTokens: 8000,
           temperature: 0.7,
         },
       }),

@@ -163,25 +163,25 @@ export default function TradingChatbot({ sessionData }: ChatbotProps) {
                         }`}
                       >
                         {message.type === 'user' ? (
-                          <p className="text-sm">{message.content}</p>
+                          <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                         ) : (
-                          <div className="text-sm prose prose-invert prose-sm max-w-none">
+                          <div className="text-sm whitespace-pre-wrap break-words">
                             <ReactMarkdown
                               components={{
-                                h2: ({ node, ...props }) => <h2 className="text-sm font-bold mt-2 mb-1" {...props} />,
-                                h3: ({ node, ...props }) => <h3 className="text-xs font-bold mt-1.5 mb-0.5" {...props} />,
-                                p: ({ node, ...props }) => <p className="mb-1" {...props} />,
-                                ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-1 pl-2" {...props} />,
-                                ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-1 pl-2" {...props} />,
-                                li: ({ node, ...props }) => <li className="mb-0.5" {...props} />,
+                                h2: ({ node, ...props }) => <h2 className="text-sm font-bold mt-2 mb-1 break-words" {...props} />,
+                                h3: ({ node, ...props }) => <h3 className="text-xs font-bold mt-1.5 mb-0.5 break-words" {...props} />,
+                                p: ({ node, ...props }) => <p className="mb-1 break-words" {...props} />,
+                                ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-1 pl-2 break-words" {...props} />,
+                                ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-1 pl-2 break-words" {...props} />,
+                                li: ({ node, ...props }) => <li className="mb-0.5 break-words" {...props} />,
                                 code: ({ node, inline, ...props }) => 
                                   inline ? (
-                                    <code className="bg-cyber-cyan/20 px-1.5 py-0.5 rounded text-xs" {...props} />
+                                    <code className="bg-cyber-cyan/20 px-1.5 py-0.5 rounded text-xs break-words" {...props} />
                                   ) : (
-                                    <code className="bg-cyber-navy/40 px-2 py-1 rounded text-xs block my-1" {...props} />
+                                    <code className="bg-cyber-navy/40 px-2 py-1 rounded text-xs block my-1 break-words overflow-x-auto" {...props} />
                                   ),
-                                strong: ({ node, ...props }) => <strong className="font-bold text-cyber-neon-green" {...props} />,
-                                em: ({ node, ...props }) => <em className="italic" {...props} />,
+                                strong: ({ node, ...props }) => <strong className="font-bold text-cyber-neon-green break-words" {...props} />,
+                                em: ({ node, ...props }) => <em className="italic break-words" {...props} />,
                               }}
                             >
                               {message.content}
