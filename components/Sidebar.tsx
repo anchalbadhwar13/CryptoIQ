@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Home, TrendingUp, AlertTriangle, BarChart3, Gamepad2, BookOpen, User, LogOut } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
@@ -17,6 +17,12 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = () => {
+    // Clear any stored data and redirect to home
+    router.push('/')
+  }
 
   return (
     <motion.aside
@@ -59,7 +65,10 @@ export default function Sidebar() {
         </nav>
 
         {/* Logout */}
-        <button className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-500/20 transition-all duration-200 mt-4 border border-transparent hover:border-red-500/40">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-500/20 transition-all duration-200 mt-4 border border-transparent hover:border-red-500/40"
+        >
           <LogOut className="w-5 h-5" />
           <span className="font-medium">Logout</span>
         </button>
