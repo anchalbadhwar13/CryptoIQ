@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { BookOpen, Eye, Shield, Award, Trophy, Target, TrendingUp } from 'lucide-react'
+import { BookOpen, Eye, Shield, Award, Trophy, Target, TrendingUp, CheckCircle2 } from 'lucide-react'
 import GlassCard from '@/components/GlassCard'
 
 interface Lesson {
@@ -24,38 +25,86 @@ interface Badge {
   color: string
 }
 
-export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<'learn' | 'profile'>('learn')
+const baseLessons = [
+  {
+    id: 1,
+    title: 'What is a Wallet?',
+    description: 'Learn the fundamentals of cryptocurrency wallets',
+    icon: Shield,
+    views: 1234,
+  },
+  {
+    id: 2,
+    title: 'Market Cap vs. Price',
+    description: 'Understand the difference between market capitalization and token price',
+    icon: TrendingUp,
+    views: 987,
+  },
+  {
+    id: 3,
+    title: 'Candlestick Charts',
+    description: 'Master reading candlestick patterns for trading',
+    icon: Target,
+    views: 654,
+  },
+]
 
-  const lessons: Lesson[] = [
-    {
-      id: 1,
-      title: 'What is a Wallet?',
-      description: 'Learn the fundamentals of cryptocurrency wallets',
-      progress: 75,
-      icon: Shield,
-      views: 1234,
-      completed: false,
-    },
-    {
-      id: 2,
-      title: 'Market Cap vs. Price',
-      description: 'Understand the difference between market capitalization and token price',
-      progress: 50,
-      icon: TrendingUp,
-      views: 987,
-      completed: false,
-    },
-    {
-      id: 3,
-      title: 'Candlestick Charts',
-      description: 'Master reading candlestick patterns for trading',
-      progress: 100,
-      icon: Target,
-      views: 654,
-      completed: true,
-    },
-  ]
+export default function DashboardPage() {
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<'learn' | 'profile'>('learn')
+  const [lessons, setLessons] = useState<Lesson[]>([])
+
+  // Load progress from localStorage
+  useEffect(() => {
+    const loadLessonProgress = () => {
+      const updatedLessons: Lesson[] = baseLessons.map((baseLesson) => {
+        // Get progress from localStorage
+        const progressData = localStorage.getItem(`lesson-${baseLesson.id}-progress`)
+        const completed = localStorage.getItem(`lesson-${baseLesson.id}-completed`) === 'true'
+        
+        let progress = 0
+        if (progressData) {
+          try {
+            const parsed = JSON.parse(progressData)
+            progress = parsed.progress || 0
+          } catch (e) {
+            progress = 0
+          }
+        }
+
+        return {
+          ...baseLesson,
+          progress,
+          completed,
+        }
+      })
+      
+      setLessons(updatedLessons)
+    }
+
+    // Load progress on mount
+    loadLessonProgress()
+
+    // Refresh progress when page becomes visible (when user returns from lesson)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        loadLessonProgress()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // Also refresh on focus as backup
+    const handleFocus = () => {
+      loadLessonProgress()
+    }
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [])
 
   const badges: Badge[] = [
     {
@@ -83,6 +132,9 @@ export default function DashboardPage() {
       color: 'from-cyber-cyan to-cyber-neon-green',
     },
   ]
+
+  // Check if all lessons are 100% complete
+  const allLessonsComplete = lessons.length > 0 && lessons.every(lesson => lesson.progress === 100)
 
   // Calculate Safety Score based on progress and badges
   const safetyScore = Math.round(
@@ -134,7 +186,10 @@ export default function DashboardPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: idx * 0.1 }}
                 >
-                  <GlassCard className="p-6 glass-card-hover cursor-pointer">
+                  <GlassCard 
+                    className="p-6 glass-card-hover cursor-pointer transition-all hover:scale-105"
+                    onClick={() => router.push(`/dashboard/lesson/${lesson.id}`)}
+                  >
                     <div className="flex items-start justify-between mb-4">
                       <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
                         lesson.completed
@@ -170,10 +225,63 @@ export default function DashboardPage() {
                         Completed
                       </div>
                     )}
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <div className="text-sm text-cyber-cyan font-medium flex items-center gap-2">
+                        <BookOpen className="w-4 h-4" />
+                        Start Learning →
+                      </div>
+                    </div>
                   </GlassCard>
                 </motion.div>
               )
             })}
+            
+            {/* Quiz Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: lessons.length * 0.1 }}
+            >
+              <GlassCard 
+                className={`p-6 ${
+                  allLessonsComplete
+                    ? 'glass-card-hover cursor-pointer transition-all hover:scale-105'
+                    : 'opacity-50'
+                }`}
+                onClick={() => allLessonsComplete && router.push('/dashboard/quiz')}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    allLessonsComplete
+                      ? 'bg-gradient-to-br from-cyber-neon-green to-cyber-cyan'
+                      : 'bg-cyber-navy/60'
+                  }`}>
+                    <Award className={`w-6 h-6 ${allLessonsComplete ? 'text-cyber-dark' : 'text-gray-500'}`} />
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold mb-2">Final Quiz</h3>
+                <p className="text-sm text-gray-400 mb-4">
+                  Test your knowledge with an AI-generated quiz. Score 80% or higher to pass!
+                </p>
+                <div className="space-y-2">
+                  <div className="text-sm text-gray-400">
+                    {allLessonsComplete ? (
+                      <span className="text-cyber-neon-green font-medium">✓ Unlocked - Ready to take!</span>
+                    ) : (
+                      <span>Complete all 3 lessons to unlock (0/{lessons.length} complete)</span>
+                    )}
+                  </div>
+                </div>
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <div className={`text-sm font-medium flex items-center gap-2 ${
+                    allLessonsComplete ? 'text-cyber-cyan' : 'text-gray-600'
+                  }`}>
+                    <Trophy className="w-4 h-4" />
+                    Take Quiz →
+                  </div>
+                </div>
+              </GlassCard>
+            </motion.div>
           </div>
         </motion.div>
       )}
@@ -244,6 +352,40 @@ export default function DashboardPage() {
                 )
               })}
             </div>
+          </div>
+
+          {/* Quiz Status */}
+          <div>
+            <h2 className="text-2xl font-bold mb-6">Quiz Progress</h2>
+            <GlassCard className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold mb-2">Final Knowledge Assessment</h3>
+                  <p className="text-sm text-gray-400 mb-4">
+                    {allLessonsComplete
+                      ? 'All modules completed! You can now take the final quiz.'
+                      : `Complete all ${lessons.length} modules to unlock the final quiz (${lessons.filter(l => l.progress === 100).length}/${lessons.length} complete)`}
+                  </p>
+                  {typeof window !== 'undefined' && localStorage.getItem('quiz-completed') === 'true' && (
+                    <div className="flex items-center gap-3 mt-4">
+                      <CheckCircle2 className="w-5 h-5 text-cyber-neon-green" />
+                      <div>
+                        <p className="text-sm font-medium text-cyber-neon-green">Quiz Completed</p>
+                        <p className="text-xs text-gray-400">Score: {localStorage.getItem('quiz-score')}%</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {allLessonsComplete && (
+                  <button
+                    onClick={() => router.push('/dashboard/quiz')}
+                    className="btn-primary"
+                  >
+                    Take Quiz
+                  </button>
+                )}
+              </div>
+            </GlassCard>
           </div>
         </motion.div>
       )}

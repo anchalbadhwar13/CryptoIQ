@@ -5,14 +5,17 @@ interface GlassCardProps {
   children: ReactNode
   className?: string
   hover?: boolean
+  onClick?: () => void
 }
 
-export default function GlassCard({ children, className, hover = false }: GlassCardProps) {
+export default function GlassCard({ children, className, hover = false, onClick }: GlassCardProps) {
   return (
     <div
+      onClick={onClick}
       className={cn(
         'glass-card',
         hover && 'glass-card-hover',
+        onClick && 'cursor-pointer',
         className
       )}
     >

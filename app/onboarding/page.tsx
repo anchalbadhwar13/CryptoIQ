@@ -10,15 +10,12 @@ interface StepData {
   savingsAmount?: string
   savingsGoal?: string
   riskTolerance?: string
-  bankConnected?: boolean
 }
 
 export default function OnboardingPage() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
-  const [data, setData] = useState<StepData>({
-    bankConnected: false,
-  })
+  const [data, setData] = useState<StepData>({})
 
   const steps = [
     {
@@ -73,53 +70,6 @@ export default function OnboardingPage() {
               ))}
             </div>
           </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Connect your bank (Optional)',
-      description: 'Securely link your account for personalized insights',
-      content: (
-        <div className="space-y-6">
-          <GlassCard className="p-6 bg-cyber-navy/60">
-            <div className="flex items-start gap-4 mb-4">
-              <Building2 className="w-8 h-8 text-cyber-cyan flex-shrink-0 mt-1" />
-              <div>
-                <h3 className="font-bold mb-2">Bank Connect</h3>
-                <p className="text-sm text-gray-400 mb-4">
-                  Connect securely to see your savings in one place. This is a mock integration for demonstration purposes.
-                </p>
-                <p className="text-xs text-gray-500">
-                  🔒 Your data is encrypted and secure. This feature uses sandboxed API endpoints.
-                </p>
-              </div>
-            </div>
-            {data.bankConnected ? (
-              <div className="flex items-center gap-2 text-cyber-neon-green">
-                <CheckCircle2 className="w-5 h-5" />
-                <span className="font-medium">Bank Account Connected</span>
-              </div>
-            ) : (
-              <button
-                onClick={() => {
-                  // Mock bank connection
-                  setTimeout(() => {
-                    setData({ ...data, bankConnected: true })
-                  }, 1500)
-                }}
-                className="btn-secondary w-full"
-              >
-                <CreditCard className="w-5 h-5 inline mr-2" />
-                Connect Bank Account (Mock)
-              </button>
-            )}
-          </GlassCard>
-          <button
-            onClick={() => setCurrentStep(currentStep + 1)}
-            className="w-full text-gray-400 hover:text-cyber-cyan transition-colors text-sm"
-          >
-            Skip for now
-          </button>
         </div>
       ),
     },
