@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Play, Pause, TrendingUp, TrendingDown, DollarSign, Target, Award, Info, X } from 'lucide-react'
 import GlassCard from '@/components/GlassCard'
+import TradingChatbot from '@/components/TradingChatbot'
 import Joyride, { CallBackProps, STATUS, EVENTS, ACTIONS, Step } from 'react-joyride'
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 
@@ -308,6 +309,17 @@ export default function GamePage() {
           </button>
         </div>
       )}
+      <TradingChatbot
+        sessionData={{
+          currentPrice,
+          balance,
+          holdings,
+          trades,
+          portfolioValue,
+          roi,
+          isPlaying,
+        }}
+      />
     </div>
   )
 }
