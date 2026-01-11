@@ -142,6 +142,17 @@ export default function DashboardPage() {
     (badges.filter(b => b.unlocked).length / badges.length) * 50
   )
 
+  // Count completed lessons
+  const lessonsCompleted = lessons.filter(lesson => lesson.completed).length
+
+  // Update profile stats in localStorage whenever they change
+  useEffect(() => {
+    if (lessons.length > 0) {
+      localStorage.setItem('safetyScore', safetyScore.toString())
+      localStorage.setItem('lessonsCompleted', lessonsCompleted.toString())
+    }
+  }, [safetyScore, lessonsCompleted, lessons.length])
+
   return (
     <div className="space-y-6">
       {/* Header Tabs */}

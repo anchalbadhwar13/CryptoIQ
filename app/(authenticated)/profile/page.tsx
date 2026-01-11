@@ -1,40 +1,46 @@
 'use client'
 
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { User, Mail, Shield, Award, TrendingUp, Clock, Edit2, Save, X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { User, Shield, Award, TrendingUp, Clock, Edit2, Save, X } from 'lucide-react'
 import GlassCard from '@/components/GlassCard'
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [profile, setProfile] = useState({
-    name: 'Crypto Learner',
-    email: 'learner@example.com',
-    joinDate: 'January 2026',
+    name: '',
+    email: '',
+    joinDate: '',
   })
   const [editForm, setEditForm] = useState(profile)
+  const [stats, setStats] = useState({
+    safetyScore: 0,
+    lessonsCompleted: 0,
+    simulatorSessions: 0,
+    totalTrades: 0,
+  })
 
-  // Mock stats - in a real app, these would come from a database
-  const stats = {
-    safetyScore: 72,
-    lessonsCompleted: 8,
-    simulatorSessions: 12,
-    totalTrades: 45,
-    bestROI: 15.3,
-    learningStreak: 5,
-  }
+  // Load profile and stats from localStorage
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('userProfile')
+    if (savedProfile) {
+      const parsed = JSON.parse(savedProfile)
+      setProfile(parsed)
+      setEditForm(parsed)
+    }
 
-  const achievements = [
-    { name: 'First Trade', description: 'Made your first simulated trade', earned: true, icon: '🎯' },
-    { name: 'Risk Aware', description: 'Checked risk scores for 5 coins', earned: true, icon: '🛡️' },
-    { name: 'Market Watcher', description: 'Viewed market data 10 times', earned: true, icon: '📊' },
-    { name: 'Profitable Trader', description: 'Achieved 10% ROI in simulator', earned: true, icon: '💰' },
-    { name: 'Safety First', description: 'Reach 80 Safety Score', earned: false, icon: '🏆' },
-    { name: 'Trading Pro', description: 'Complete 100 trades', earned: false, icon: '⭐' },
-  ]
+    // Load stats from localStorage
+    const savedStats = {
+      safetyScore: parseInt(localStorage.getItem('safetyScore') || '0'),
+      lessonsCompleted: parseInt(localStorage.getItem('lessonsCompleted') || '0'),
+      simulatorSessions: parseInt(localStorage.getItem('simulatorSessions') || '0'),
+      totalTrades: parseInt(localStorage.getItem('totalTrades') || '0'),
+    }
+    setStats(savedStats)
+  }, [])
 
   const handleSave = () => {
     setProfile(editForm)
+    localStorage.setItem('userProfile', JSON.stringify(editForm))
     setIsEditing(false)
   }
 
@@ -93,9 +99,11 @@ export default function ProfilePage() {
               </div>
             ) : (
               <>
-                <h2 className="text-2xl font-bold mb-1">{profile.name}</h2>
-                <p className="text-gray-400 mb-2">{profile.email}</p>
-                <p className="text-sm text-gray-500 mb-4">Member since {profile.joinDate}</p>
+                <h2 className="text-2xl font-bold mb-1">{profile.name || 'Set your name'}</h2>
+                <p className="text-gray-400 mb-2">{profile.email || 'Set your email'}</p>
+                {profile.joinDate && (
+                  <p className="text-sm text-gray-500 mb-4">Member since {profile.joinDate}</p>
+                )}
                 <button
                   onClick={() => setIsEditing(true)}
                   className="flex items-center gap-2 px-4 py-2 mx-auto bg-cyber-cyan/20 border border-cyber-cyan/50 rounded-lg hover:bg-cyber-cyan/30 transition-colors"
@@ -116,7 +124,7 @@ export default function ProfilePage() {
             <div className="w-full bg-gray-700 rounded-full h-3">
               <div
                 className="bg-gradient-to-r from-cyber-cyan to-cyber-neon-green h-3 rounded-full transition-all duration-500"
-                style={{ width: `${stats.safetyScore}%` }}
+                style={{ width: `${Math.min(stats.safetyScore, 100)}%` }}
               />
             </div>
             <p className="text-xs text-gray-500 mt-2">Keep learning to improve your score!</p>
@@ -124,99 +132,59 @@ export default function ProfilePage() {
         </GlassCard>
 
         {/* Stats Grid */}
-        <div className="lg:col-span-2 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[
-            { label: 'Lessons Completed', value: stats.lessonsCompleted, icon: Award, color: 'text-cyber-cyan' },
-            { label: 'Simulator Sessions', value: stats.simulatorSessions, icon: TrendingUp, color: 'text-cyber-neon-green' },
-            { label: 'Total Trades', value: stats.totalTrades, icon: Shield, color: 'text-cyber-orange' },
-            { label: 'Best ROI', value: `${stats.bestROI}%`, icon: TrendingUp, color: 'text-green-400' },
-            { label: 'Learning Streak', value: `${stats.learningStreak} days`, icon: Clock, color: 'text-purple-400' },
-            { label: 'Safety Score', value: stats.safetyScore, icon: Shield, color: 'text-cyber-neon-green' },
-          ].map((stat, idx) => {
-            const Icon = stat.icon
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-              >
-                <GlassCard className="p-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-white/5 ${stat.color}`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">{stat.value}</p>
-                      <p className="text-sm text-gray-400">{stat.label}</p>
-                    </div>
-                  </div>
-                </GlassCard>
-              </motion.div>
-            )
-          })}
+        <div className="lg:col-span-2 grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-white/5 text-cyber-cyan">
+                <Award className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.lessonsCompleted}</p>
+                <p className="text-sm text-gray-400">Lessons Completed</p>
+              </div>
+            </div>
+          </GlassCard>
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-white/5 text-cyber-neon-green">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.simulatorSessions}</p>
+                <p className="text-sm text-gray-400">Simulator Sessions</p>
+              </div>
+            </div>
+          </GlassCard>
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-white/5 text-cyber-orange">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.totalTrades}</p>
+                <p className="text-sm text-gray-400">Total Trades</p>
+              </div>
+            </div>
+          </GlassCard>
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-white/5 text-cyber-neon-green">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{stats.safetyScore}</p>
+                <p className="text-sm text-gray-400">Safety Score</p>
+              </div>
+            </div>
+          </GlassCard>
         </div>
       </div>
 
-      {/* Achievements */}
-      <GlassCard className="p-6">
-        <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-          <Award className="w-6 h-6 text-cyber-cyan" />
-          Achievements
-        </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {achievements.map((achievement, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: idx * 0.05 }}
-              className={`p-4 rounded-lg border ${
-                achievement.earned
-                  ? 'bg-cyber-cyan/10 border-cyber-cyan/30'
-                  : 'bg-gray-800/50 border-white/10 opacity-50'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-3xl">{achievement.icon}</span>
-                <div>
-                  <p className="font-bold">{achievement.name}</p>
-                  <p className="text-sm text-gray-400">{achievement.description}</p>
-                </div>
-              </div>
-              {achievement.earned && (
-                <span className="text-xs text-cyber-neon-green mt-2 block">✓ Earned</span>
-              )}
-            </motion.div>
-          ))}
-        </div>
-      </GlassCard>
-
-      {/* Learning Progress */}
-      <GlassCard className="p-6">
-        <h2 className="text-xl font-bold mb-6">Learning Progress</h2>
-        <div className="space-y-4">
-          {[
-            { name: 'Crypto Basics', progress: 100, color: 'from-cyber-cyan to-cyber-cyan' },
-            { name: 'Understanding Risk', progress: 75, color: 'from-cyber-neon-green to-cyber-neon-green' },
-            { name: 'Market Analysis', progress: 50, color: 'from-cyber-orange to-cyber-orange' },
-            { name: 'Trading Strategies', progress: 25, color: 'from-purple-500 to-purple-500' },
-            { name: 'Advanced Topics', progress: 0, color: 'from-gray-500 to-gray-500' },
-          ].map((course, idx) => (
-            <div key={idx}>
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">{course.name}</span>
-                <span className="text-gray-400">{course.progress}%</span>
-              </div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
-                <div
-                  className={`bg-gradient-to-r ${course.color} h-2 rounded-full transition-all duration-500`}
-                  style={{ width: `${course.progress}%` }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+      {/* Info Message */}
+      <GlassCard className="p-6 bg-cyber-cyan/5 border-cyber-cyan/20">
+        <p className="text-center text-gray-400">
+          Your stats will update as you complete lessons, use the simulator, and explore the app.
+        </p>
       </GlassCard>
     </div>
   )
