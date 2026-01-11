@@ -108,9 +108,9 @@ export default function GamePage() {
 
   const handleTutorialCallback = (data: CallBackProps) => {
     const { status, type, action, index } = data
-    if ([EVENTS.STEP_AFTER, EVENTS.TARGET_NOT_FOUND].includes(type)) {
+    if (type === EVENTS.STEP_AFTER || type === EVENTS.TARGET_NOT_FOUND) {
       setTutorialStepIndex(index + (action === ACTIONS.PREV ? -1 : 1))
-    } else if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
+    } else if (status === STATUS.FINISHED || status === STATUS.SKIPPED) {
       setRunTutorial(false)
       setTutorialStepIndex(0)
     }

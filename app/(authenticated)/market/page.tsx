@@ -173,7 +173,7 @@ export default function MarketPage() {
                           <div>
                             <div className="font-bold flex items-center gap-2">
                               {coin.name} 
-                              {isTrending && <Flame className="w-4 h-4 text-orange-400" title="Trending" />}
+                              {isTrending && <div className="relative group"><Flame className="w-4 h-4 text-orange-400" /><span className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-gray-900 text-xs text-white px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap">Trending</span></div>}
                             </div>
                             <div className="text-sm text-gray-400 uppercase">{coin.symbol}</div>
                           </div>
