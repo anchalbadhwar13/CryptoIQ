@@ -176,12 +176,14 @@ export default function TradingChatbot({ sessionData }: ChatbotProps) {
                                 ul: ({ node, ...props }) => <ul className="list-disc list-inside mb-1 pl-2 break-words" {...props} />,
                                 ol: ({ node, ...props }) => <ol className="list-decimal list-inside mb-1 pl-2 break-words" {...props} />,
                                 li: ({ node, ...props }) => <li className="mb-0.5 break-words" {...props} />,
-                                code: ({ node, inline, ...props }) => 
-                                  inline ? (
-                                    <code className="bg-cyber-cyan/20 px-1.5 py-0.5 rounded text-xs break-words" {...props} />
+                                code: ({ node, className, children, ...props }) => {
+                                  const isInline = !className?.includes('language-')
+                                  return isInline ? (
+                                    <code className="bg-cyber-cyan/20 px-1.5 py-0.5 rounded text-xs break-words" {...props}>{children}</code>
                                   ) : (
-                                    <code className="bg-cyber-navy/40 px-2 py-1 rounded text-xs block my-1 break-words overflow-x-auto" {...props} />
-                                  ),
+                                    <code className="bg-cyber-navy/40 px-2 py-1 rounded text-xs block my-1 break-words overflow-x-auto" {...props}>{children}</code>
+                                  )
+                                },
                                 strong: ({ node, ...props }) => <strong className="font-bold text-cyber-neon-green break-words" {...props} />,
                                 em: ({ node, ...props }) => <em className="italic break-words" {...props} />,
                               }}

@@ -33,6 +33,12 @@ const config: Config = {
         'pulse-glow': 'pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'slide-in': 'slide-in 0.3s ease-out',
         'fade-in': 'fade-in 0.3s ease-out',
+        'float': 'float 6s ease-in-out infinite',
+        'float-slow': 'float 8s ease-in-out infinite',
+        'float-fast': 'float 4s ease-in-out infinite',
+        'spin-slow': 'spin 20s linear infinite',
+        'bounce-slow': 'bounce 3s infinite',
+        'gradient': 'gradient 8s ease infinite',
       },
       keyframes: {
         'pulse-glow': {
@@ -46,6 +52,14 @@ const config: Config = {
         'fade-in': {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-20px)' },
+        },
+        'gradient': {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
         },
       },
     },

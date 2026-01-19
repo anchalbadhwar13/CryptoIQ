@@ -1,5 +1,15 @@
-const GEMINI_API_KEY = 'AIzaSyCTC4pu05FvfypR8MUdzfof08Aip63z0i0'
+// SECURITY: Use environment variable, never hardcode API keys
+const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
+
+// Validate API key exists (but don't expose it)
+function validateApiKey(): boolean {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY.length < 10) {
+    console.error('Gemini API key is not configured properly')
+    return false
+  }
+  return true
+}
 
 export interface QuizQuestion {
   id: string
@@ -19,6 +29,12 @@ export interface QuizSession {
 }
 
 export async function generateQuizQuestions(): Promise<QuizQuestion[]> {
+  // Validate API key before making request
+  if (!validateApiKey()) {
+    console.error('API key validation failed, using fallback questions')
+    return getFallbackQuestions()
+  }
+
   const prompt = `Generate 10 multiple choice quiz questions about cryptocurrency and blockchain safety. Each question should test understanding of crypto wallets, market analysis, and risk management.
 
 Return ONLY a valid JSON array with this exact structure (no markdown, no extra text):
@@ -35,7 +51,7 @@ Return ONLY a valid JSON array with this exact structure (no markdown, no extra 
 Make questions progressively harder. Ensure questions cover: wallets (q1-q3), market analysis (q4-q7), risk management (q8-q10).`
 
   try {
-    const response = await fetch(GEMINI_API_URL, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

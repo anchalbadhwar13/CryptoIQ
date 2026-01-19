@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, Pause, TrendingUp, TrendingDown, DollarSign, Target, Award, Info, X } from 'lucide-react'
+import { Play, Pause, TrendingUp, TrendingDown, DollarSign, Target, Award, Info, X, Loader2 } from 'lucide-react'
 import GlassCard from '@/components/GlassCard'
 import TradingChatbot from '@/components/TradingChatbot'
 import Joyride, { CallBackProps, STATUS, EVENTS, ACTIONS, Step } from 'react-joyride'
@@ -45,6 +45,49 @@ export default function GamePage() {
   const [time, setTime] = useState(0)
   const [runTutorial, setRunTutorial] = useState(false)
   const [tutorialStepIndex, setTutorialStepIndex] = useState(0)
+  
+  // Pattern analysis state
+  const [identifiedPatterns, setIdentifiedPatterns] = useState<string[]>([])
+  const [patternInsights, setPatternInsights] = useState<string>('')
+  const [patternSuggestion, setPatternSuggestion] = useState<string>('')
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+
+  // Fetch pattern analysis from API
+  const analyzePatterns = useCallback(async () => {
+    if (trades.length < 3) {
+      setIdentifiedPatterns(['Complete more trades to identify patterns'])
+      return
+    }
+
+    setIsAnalyzing(true)
+    try {
+      const response = await fetch('/api/patterns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          trades,
+          priceHistory,
+          currentPrice,
+          balance,
+          holdings,
+          portfolioValue: balance + holdings * currentPrice,
+          roi: ((currentPrice - sessionStartPrice) / sessionStartPrice) * 100
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setIdentifiedPatterns(data.patterns || [])
+        setPatternInsights(data.insights || '')
+        setPatternSuggestion(data.suggestion || '')
+      }
+    } catch (error) {
+      console.error('Pattern analysis error:', error)
+      setIdentifiedPatterns(['Analysis temporarily unavailable'])
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }, [trades, priceHistory, currentPrice, balance, holdings, sessionStartPrice])
 
   // Track trades in localStorage for profile
   useEffect(() => {
@@ -135,7 +178,13 @@ export default function GamePage() {
   const portfolioValue = balance + holdings * currentPrice
   const roi = ((currentPrice - sessionStartPrice) / sessionStartPrice) * 100
   const profit = portfolioValue - 10000
-  const identifiedPatterns = trades.length > 5 ? ['Recognized bullish momentum', 'Identified support level', 'Detected trend reversal'] : []
+
+  // Analyze patterns when showing summary
+  useEffect(() => {
+    if (showSummary && trades.length >= 3) {
+      analyzePatterns()
+    }
+  }, [showSummary, analyzePatterns, trades.length])
 
   return (
     <div className="space-y-6">
@@ -291,25 +340,36 @@ export default function GamePage() {
                   <h3 className="font-bold mb-3 flex items-center gap-2">
                     <Award className="w-5 h-5 text-cyber-cyan" />
                     Patterns Identified
+                    {isAnalyzing && <Loader2 className="w-4 h-4 animate-spin text-cyber-cyan" />}
                   </h3>
                   {identifiedPatterns.length > 0 ? (
                     <ul className="space-y-2">
                       {identifiedPatterns.map((pattern, idx) => (
-                        <li key={idx} className="flex items-center gap-2 text-gray-300">
-                          <Target className="w-4 h-4 text-cyber-neon-green" />
-                          {pattern}
+                        <li key={idx} className="flex items-start gap-2 text-gray-300">
+                          <Target className="w-4 h-4 text-cyber-neon-green mt-0.5 flex-shrink-0" />
+                          <span>{pattern}</span>
                         </li>
                       ))}
                     </ul>
                   ) : (
                     <p className="text-gray-400 text-sm">Complete more trades to identify trading patterns!</p>
                   )}
+                  {patternInsights && (
+                    <div className="mt-4 p-3 bg-cyber-cyan/10 border border-cyber-cyan/20 rounded-lg">
+                      <p className="text-sm text-gray-300">{patternInsights}</p>
+                    </div>
+                  )}
+                  {patternSuggestion && (
+                    <div className="mt-3 p-3 bg-cyber-neon-green/10 border border-cyber-neon-green/20 rounded-lg">
+                      <p className="text-sm text-cyber-neon-green font-medium">💡 Tip: {patternSuggestion}</p>
+                    </div>
+                  )}
                 </div>
                 <div className="pt-4 border-t border-white/10">
                   <p className="text-gray-400 text-sm mb-4">
                     ROI: {roi >= 0 ? '+' : ''}{roi.toFixed(2)}% | Session Duration: {Math.floor(time / 60)}:{(time % 60).toString().padStart(2, '0')}
                   </p>
-                  <button onClick={() => { setShowSummary(false); setIsPlaying(false); setBalance(10000); setHoldings(0); setTrades([]); setCurrentPrice(70000); setPriceHistory([]); setTime(0) }} className="w-full btn-primary">
+                  <button onClick={() => { setShowSummary(false); setIsPlaying(false); setBalance(10000); setHoldings(0); setTrades([]); setCurrentPrice(70000); setPriceHistory([]); setTime(0); setIdentifiedPatterns([]); setPatternInsights(''); setPatternSuggestion('') }} className="w-full btn-primary">
                     Start New Session
                   </button>
                 </div>

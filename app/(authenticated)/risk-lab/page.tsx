@@ -7,7 +7,7 @@ import GlassCard from '@/components/GlassCard'
 import AnimatedGauge from '@/components/AnimatedGauge'
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Area, AreaChart } from 'recharts'
 import { useCryptoWithRisk, usePriceHistory } from '@/lib/hooks/useCryptoData'
-import { CoinMarketData, calculateVolatilityScore } from '@/lib/api/crypto'
+import { CoinMarketData } from '@/lib/api/crypto'
 
 interface EnhancedCoinData extends CoinMarketData {
   riskScore: number

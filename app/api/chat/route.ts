@@ -2,6 +2,49 @@ import { NextRequest, NextResponse } from 'next/server'
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW = 60000 // 1 minute
+const MAX_REQUESTS_PER_WINDOW = 20 // Max requests per minute per IP
+const MAX_MESSAGE_LENGTH = 2000 // Max characters per message
+
+// Simple in-memory rate limiter (use Redis in production for multi-instance)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
+
+function getRateLimitKey(req: NextRequest): string {
+  // Get IP from various headers (Vercel, Cloudflare, etc.)
+  const forwarded = req.headers.get('x-forwarded-for')
+  const realIp = req.headers.get('x-real-ip')
+  const cfIp = req.headers.get('cf-connecting-ip')
+  return forwarded?.split(',')[0] || realIp || cfIp || 'unknown'
+}
+
+function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
+  const now = Date.now()
+  const record = rateLimitMap.get(ip)
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW })
+    return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - 1 }
+  }
+  
+  if (record.count >= MAX_REQUESTS_PER_WINDOW) {
+    return { allowed: false, remaining: 0 }
+  }
+  
+  record.count++
+  return { allowed: true, remaining: MAX_REQUESTS_PER_WINDOW - record.count }
+}
+
+// Clean up old rate limit entries periodically
+setInterval(() => {
+  const now = Date.now()
+  for (const [ip, record] of rateLimitMap.entries()) {
+    if (now > record.resetTime) {
+      rateLimitMap.delete(ip)
+    }
+  }
+}, 60000)
+
 interface TradeData {
   type: 'buy' | 'sell'
   price: number
@@ -10,6 +53,24 @@ interface TradeData {
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting check
+    const clientIp = getRateLimitKey(req)
+    const rateLimit = checkRateLimit(clientIp)
+    
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait a moment before trying again.' },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': MAX_REQUESTS_PER_WINDOW.toString(),
+            'X-RateLimit-Remaining': '0',
+            'Retry-After': '60'
+          }
+        }
+      )
+    }
+
     // Check if API key exists
     if (!GEMINI_API_KEY) {
       console.error('GEMINI_API_KEY is not set')
@@ -19,7 +80,36 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { message, sessionData, conversationHistory } = await req.json()
+    const body = await req.json()
+    const { message, sessionData, conversationHistory } = body
+
+    // Input validation
+    if (!message || typeof message !== 'string') {
+      return NextResponse.json(
+        { error: 'Message is required and must be a string' },
+        { status: 400 }
+      )
+    }
+
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json(
+        { error: `Message too long. Maximum ${MAX_MESSAGE_LENGTH} characters allowed.` },
+        { status: 400 }
+      )
+    }
+
+    // Sanitize message - remove potential injection attempts
+    const sanitizedMessage = message
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/javascript:/gi, '')
+      .trim()
+
+    if (!sanitizedMessage) {
+      return NextResponse.json(
+        { error: 'Message cannot be empty' },
+        { status: 400 }
+      )
+    }
 
     // Build conversation context based on whether we have session data
     let systemPrompt: string
@@ -62,16 +152,16 @@ Always emphasize safety and warn about risks when relevant.
 If asked about specific investment advice, remind users to do their own research (DYOR).`
     }
 
-    const contents = conversationHistory
+    const contents = (conversationHistory || [])
       .slice(-10) // Keep last 10 messages for context
       .map((msg: any) => ({
         role: msg.type === 'user' ? 'user' : 'model',
         parts: [{ text: msg.content }],
       }))
-      .concat([{ role: 'user', parts: [{ text: message }] }])
+      .concat([{ role: 'user', parts: [{ text: sanitizedMessage }] }])
 
     // Add system prompt at the beginning if first message
-    if (conversationHistory.length === 0) {
+    if (!conversationHistory || conversationHistory.length === 0) {
       contents.unshift(
         { role: 'user', parts: [{ text: systemPrompt }] },
         { role: 'model', parts: [{ text: 'Understood. I am your trading assistant. How can I help you today?' }] }
